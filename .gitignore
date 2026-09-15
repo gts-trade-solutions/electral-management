@@ -1,0 +1,10 @@
+node_modules/
+# copied from node_modules by scripts/copy-maplibre-worker.mjs
+public/maplibre/
+.next/
+out/
+.vercel/
+.env*
+*.log
+next-env.d.ts
+*.tsbuildinfo

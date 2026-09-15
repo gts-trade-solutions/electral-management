@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.maplibregl-popup-content {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 4px 16px rgb(15 23 42 / 0.15);
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 10px;
+}

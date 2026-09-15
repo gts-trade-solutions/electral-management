@@ -67,7 +67,7 @@ export function NewTripForm({ onCreated, onCancel }: { onCreated: (tripId: strin
   return (
     <Card title="New trip" subtitle="Where from, where to, and which vehicle. The route is planned on real roads.">
       <form onSubmit={submit} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="From">
             <select className={inputClass} value={originId} onChange={(e) => setOriginId(e.target.value)}>
               <optgroup label="Warehouses">{options(warehouses)}</optgroup>

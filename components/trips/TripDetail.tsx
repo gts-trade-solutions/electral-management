@@ -470,8 +470,8 @@ function ManifestTable({ trip, rows }: { trip: Trip; rows: ManifestRow[] }) {
                 <th className="px-4 py-2 font-medium">Serial</th>
                 <th className="hidden px-4 py-2 font-medium sm:table-cell">Type</th>
                 <th className="px-4 py-2 font-medium">Status</th>
-                <th className="px-4 py-2 font-medium">Load seal</th>
-                <th className="px-4 py-2 font-medium">Receive seal</th>
+                <th className="hidden px-4 py-2 font-medium sm:table-cell">Load seal</th>
+                <th className="hidden px-4 py-2 font-medium sm:table-cell">Receive seal</th>
                 {canUnpick && <th className="w-10" />}
               </tr>
             </thead>
@@ -482,16 +482,31 @@ function ManifestTable({ trip, rows }: { trip: Trip; rows: ManifestRow[] }) {
                 return (
                   <tr key={r.asset.id}>
                     <td className="px-4 py-2">
-                      <Link href={`/assets?asset=${encodeURIComponent(r.asset.serial)}`} className="font-mono text-blue-700 hover:underline">
+                      <Link
+                        href={`/assets?asset=${encodeURIComponent(r.asset.serial)}`}
+                        className="whitespace-nowrap font-mono text-blue-700 hover:underline"
+                      >
                         {r.asset.serial}
                       </Link>
+                      {/* Phones: the seals sit under the serial instead of in their own columns. */}
+                      {r.load && (
+                        <div className={cx("mt-0.5 whitespace-nowrap font-mono text-xs sm:hidden", sealDiffers ? "text-red-600" : "text-slate-500")}>
+                          Seal {r.load.sealNumber ?? "—"}
+                          {r.receive && ` → ${r.receive.sealNumber ?? "—"}`}
+                        </div>
+                      )}
                     </td>
                     <td className="hidden px-4 py-2 text-slate-600 sm:table-cell">{LABEL.assetType[r.asset.type]}</td>
                     <td className="px-4 py-2">
                       <Badge tone={status.tone}>{status.label}</Badge>
                     </td>
-                    <td className="px-4 py-2 font-mono text-xs text-slate-600">{r.load?.sealNumber ?? "—"}</td>
-                    <td className={cx("px-4 py-2 font-mono text-xs", sealDiffers ? "font-semibold text-red-600" : "text-slate-600")}>
+                    <td className="hidden whitespace-nowrap px-4 py-2 font-mono text-xs text-slate-600 sm:table-cell">{r.load?.sealNumber ?? "—"}</td>
+                    <td
+                      className={cx(
+                        "hidden whitespace-nowrap px-4 py-2 font-mono text-xs sm:table-cell",
+                        sealDiffers ? "font-semibold text-red-600" : "text-slate-600",
+                      )}
+                    >
                       {r.receive?.sealNumber ?? "—"}
                     </td>
                     {canUnpick && (

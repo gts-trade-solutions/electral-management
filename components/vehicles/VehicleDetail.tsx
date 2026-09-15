@@ -362,7 +362,7 @@ function AddPersonForm({ vehicle, onDone }: { vehicle: Vehicle; onDone: () => vo
 
   return (
     <form onSubmit={submit} className="space-y-3 rounded-lg bg-slate-50 p-3 ring-1 ring-inset ring-slate-200">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Full name">
           <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required />
         </Field>

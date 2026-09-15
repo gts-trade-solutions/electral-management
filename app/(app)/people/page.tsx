@@ -162,7 +162,7 @@ function Overview() {
 
       <section>
         <h2 className="mb-2 text-sm font-semibold text-slate-900">Who is on which vehicle</h2>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {vehicles.map((v) => {
             const members = crewOf(s, v.id);
             const reader = onboard(s, v);
@@ -219,7 +219,7 @@ function Overview() {
       </section>
 
       <Card title="Everyone" subtitle="Click a name for their map, trips and full activity." flush>
-        <div className="flex flex-wrap gap-2 border-b border-slate-100 px-4 py-3">
+        <div className="flex gap-2 overflow-x-auto border-b border-slate-100 px-4 py-3 [scrollbar-width:none] sm:flex-wrap [&::-webkit-scrollbar]:hidden">
           {FILTERS.map((f) => (
             <button key={f.id} type="button" className={chipClass(filter === f.id)} onClick={() => setFilter(f.id)}>
               {f.label}
@@ -231,7 +231,32 @@ function Overview() {
             <Empty title="Nobody matches this filter" />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          {/* Phones: one line per person instead of a table. */}
+          <ul className="divide-y divide-slate-100 sm:hidden">
+            {shown.map(({ user: u, status: st }) => {
+              const vehicle = find(s.vehicles, u.vehicleId);
+              return (
+                <li key={u.id} className={cx("flex items-start gap-3 px-4 py-3", !u.active && "opacity-60")}>
+                  <span className="mt-1.5 size-2.5 shrink-0 rounded-full" style={{ background: PERSON_STATE_COLOR[st.state] }} aria-hidden />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <Link href={`/people?id=${u.id}`} className="truncate font-medium text-blue-700 hover:underline">
+                        {u.name}
+                      </Link>
+                      <span className="shrink-0 text-xs text-slate-500">{timeAgo(st.position?.recordedAt, now)}</span>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      {LABEL.role[u.role]}
+                      {vehicle && ` · ${vehicle.registration}${u.duty ? ` (${LABEL.crewRole[u.duty].toLowerCase()})` : ""}`}
+                    </p>
+                    <p className={cx("text-xs", st.state === "AWAY" ? "font-medium text-red-600" : "text-slate-700")}>{st.label}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-xs text-slate-500">
                 <tr>
@@ -294,6 +319,7 @@ function Overview() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </Card>
 

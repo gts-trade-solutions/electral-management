@@ -84,6 +84,8 @@ export function MapView({ state, focus, onSelectTrip, onSelectPerson }: Props) {
       bounds,
       fitBoundsOptions: { padding: 48 },
       attributionControl: { compact: true },
+      // On touch screens one finger scrolls the page and two move the map.
+      cooperativeGestures: window.matchMedia("(pointer: coarse)").matches,
     });
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
 

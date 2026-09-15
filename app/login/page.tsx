@@ -50,7 +50,7 @@ function Login() {
   };
 
   return (
-    <main className="grid min-h-dvh place-items-center bg-slate-900 px-4 py-10">
+    <main className="flex min-h-dvh items-center justify-center bg-slate-900 px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-6 text-center text-white">
           <Logo className="mx-auto size-12" />
@@ -94,7 +94,7 @@ function Login() {
               <p className="mb-2 text-xs font-medium text-slate-500">
                 Field staff: drivers, escorts, SAPS and electoral officers (password <span className="font-mono">{FIELD_PASSWORD}</span>)
               </p>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {field.map((u) => {
                   const vehicle = state?.vehicles.find((v) => v.id === u.vehicleId);
                   return (

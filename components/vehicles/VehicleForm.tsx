@@ -35,7 +35,7 @@ export function VehicleForm({ vehicle, onDone, onCancel }: { vehicle?: Vehicle; 
       subtitle="The number plate, the RFID tag on the windscreen, and the in-cab reader that counts crew badges and asset tags."
     >
       <form onSubmit={submit} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Registration" hint="South African plate, e.g. JK 21 LM GP or CA 123-456">
             <input
               className={cx(inputClass, "uppercase")}

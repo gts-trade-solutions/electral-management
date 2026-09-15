@@ -37,7 +37,7 @@ function TripsScreen() {
   const detailOpen = creating || !!selectedId;
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-4 p-4 lg:grid-cols-[22rem_minmax(0,1fr)]">
+    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 p-4 lg:grid-cols-[22rem_minmax(0,1fr)]">
       <aside className={cx("space-y-3", detailOpen && "hidden lg:block")}>
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold text-slate-900">Trips</h1>

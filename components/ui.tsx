@@ -111,7 +111,7 @@ export function Button({ variant = "primary", size = "md", className, type = "bu
     <button
       type={type}
       className={cx(
-        "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors",
+        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-colors",
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600",
         "disabled:cursor-not-allowed disabled:opacity-50",
         VARIANT[variant],
@@ -147,7 +147,7 @@ export function Card({
             {title && <h2 className="text-sm font-semibold text-slate-900">{title}</h2>}
             {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
           </div>
-          {action}
+          {action && <div className="shrink-0">{action}</div>}
         </header>
       )}
       <div className={flush ? undefined : "p-4"}>{children}</div>
@@ -165,8 +165,9 @@ export function Field({ label, hint, children }: { label: string; hint?: ReactNo
   );
 }
 
+/** 16px text on phones: iOS zooms the page into any field smaller than that. */
 export const inputClass =
-  "block w-full rounded-lg border-0 bg-white px-3 py-2 text-sm text-slate-900 ring-1 ring-inset ring-slate-300 " +
+  "block w-full rounded-lg border-0 bg-white px-3 py-2 text-base text-slate-900 ring-1 ring-inset ring-slate-300 sm:text-sm " +
   "placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-slate-50 disabled:text-slate-500";
 
 export function Empty({ title, children }: { title: string; children?: ReactNode }) {
@@ -181,10 +182,17 @@ export function Empty({ title, children }: { title: string; children?: ReactNode
 /** A toggleable filter pill. */
 export function chipClass(active: boolean): string {
   return cx(
-    "rounded-full px-3 py-1 text-sm ring-1 ring-inset",
+    "shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-sm ring-1 ring-inset",
     active ? "bg-slate-900 text-white ring-slate-900" : "bg-white text-slate-700 ring-slate-300 hover:bg-slate-50",
   );
 }
+
+/**
+ * A row of filter chips: one swipeable line, edge to edge, on phones; wrapping
+ * on wider screens. For containers with p-4 around them.
+ */
+export const chipRowClass =
+  "-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden";
 
 export function Stat({ label, value, tone }: { label: string; value: ReactNode; tone?: "red" | "emerald" }) {
   return (

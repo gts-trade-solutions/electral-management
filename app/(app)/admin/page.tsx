@@ -9,7 +9,7 @@ import { LABEL, timeAgo } from "@/lib/format";
 import { execute, useCan, useData, useNow, useUser } from "@/lib/hooks";
 import { PERMISSION_LABEL } from "@/lib/permissions";
 import { crewOf, find, personStatus } from "@/lib/selectors";
-import { CrewRole, PERMISSIONS, Role, type ConfigurableRole } from "@/lib/types";
+import { CrewRole, PERMISSIONS, Role, type ConfigurableRole, type User } from "@/lib/types";
 import { ROLE_SUMMARY } from "@/lib/users";
 import { formatTag, randomEpc } from "@/lib/validate";
 
@@ -51,6 +51,35 @@ function UsersCard() {
   const [adding, setAdding] = useState(false);
   const active = s.users.filter((u) => u.active);
 
+  const roleSelect = (u: User, className?: string) => (
+    <select
+      className={cx(inputClass, "py-1", className)}
+      value={u.role}
+      disabled={!u.active}
+      aria-label={`Role for ${u.name}`}
+      onChange={(e) => {
+        const role = e.target.value as Role;
+        execute((st) => setUserRole(st, me, u.id, role, new Date()), `${u.name} is now ${LABEL.role[role].toLowerCase()}.`);
+      }}
+    >
+      {Object.values(Role).map((r) => (
+        <option key={r} value={r}>
+          {LABEL.role[r]}
+        </option>
+      ))}
+    </select>
+  );
+  const activeToggle = (u: User) =>
+    u.id === me.id ? null : (
+      <Button
+        size="sm"
+        variant={u.active ? "ghost" : "secondary"}
+        onClick={() => execute((st) => setUserActive(st, me, u.id, !u.active, new Date()), `${u.name} ${u.active ? "deactivated" : "reactivated"}.`)}
+      >
+        {u.active ? "Deactivate" : "Reactivate"}
+      </Button>
+    );
+
   return (
     <Card
       title="Users"
@@ -67,7 +96,36 @@ function UsersCard() {
           <AddUserForm onDone={() => setAdding(false)} />
         </div>
       )}
-      <div className="overflow-x-auto">
+      {/* Phones: a stacked card per person instead of a wide table. */}
+      <ul className="divide-y divide-slate-100 sm:hidden">
+        {s.users.map((u) => {
+          const vehicle = find(s.vehicles, u.vehicleId);
+          const status = personStatus(s, u);
+          return (
+            <li key={u.id} className={cx("space-y-2 px-4 py-3", !u.active && "text-slate-400")}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <Link href={`/people?id=${u.id}`} className="font-medium text-blue-700 hover:underline">
+                    {u.name}
+                  </Link>
+                  {u.id === me.id && <span className="ml-1 text-xs text-slate-500">(you)</span>}
+                  <p className="truncate text-xs text-slate-500">{u.email}</p>
+                  <p className="text-xs text-slate-600">
+                    {vehicle ? `${vehicle.registration}${u.duty ? ` · ${LABEL.crewRole[u.duty]}` : ""}` : "Not on a vehicle"}
+                    {status.position && ` · seen ${timeAgo(status.position.recordedAt, now)}`}
+                  </p>
+                </div>
+                <Badge tone={u.active ? "emerald" : "slate"}>{u.active ? "Active" : "Deactivated"}</Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                {roleSelect(u, "min-w-0 flex-1")}
+                {activeToggle(u)}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="hidden overflow-x-auto sm:block">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-xs text-slate-500">
             <tr>
@@ -95,24 +153,7 @@ function UsersCard() {
                     <div className="text-xs text-slate-500 md:hidden">{u.email}</div>
                   </td>
                   <td className="hidden px-4 py-2 md:table-cell">{u.email}</td>
-                  <td className="px-4 py-2">
-                    <select
-                      className={cx(inputClass, "w-auto min-w-36 py-1")}
-                      value={u.role}
-                      disabled={!u.active}
-                      aria-label={`Role for ${u.name}`}
-                      onChange={(e) => {
-                        const role = e.target.value as Role;
-                        execute((st) => setUserRole(st, me, u.id, role, new Date()), `${u.name} is now ${LABEL.role[role].toLowerCase()}.`);
-                      }}
-                    >
-                      {Object.values(Role).map((r) => (
-                        <option key={r} value={r}>
-                          {LABEL.role[r]}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
+                  <td className="px-4 py-2">{roleSelect(u, "w-auto min-w-36")}</td>
                   <td className="px-4 py-2">
                     {vehicle ? (
                       <>
@@ -140,22 +181,7 @@ function UsersCard() {
                   <td className="px-4 py-2">
                     <Badge tone={u.active ? "emerald" : "slate"}>{u.active ? "Active" : "Deactivated"}</Badge>
                   </td>
-                  <td className="px-4 py-2 text-right">
-                    {!isMe && (
-                      <Button
-                        size="sm"
-                        variant={u.active ? "ghost" : "secondary"}
-                        onClick={() =>
-                          execute(
-                            (st) => setUserActive(st, me, u.id, !u.active, new Date()),
-                            `${u.name} ${u.active ? "deactivated" : "reactivated"}.`,
-                          )
-                        }
-                      >
-                        {u.active ? "Deactivate" : "Reactivate"}
-                      </Button>
-                    )}
-                  </td>
+                  <td className="px-4 py-2 text-right">{activeToggle(u)}</td>
                 </tr>
               );
             })}
@@ -198,7 +224,7 @@ function AddUserForm({ onDone }: { onDone: () => void }) {
 
   return (
     <form onSubmit={submit} className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Field label="Full name">
           <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} required />
         </Field>
@@ -264,15 +290,19 @@ function PermissionsCard() {
   const s = useData();
   const me = useUser();
   return (
-    <Card title="Role permissions" subtitle="Tick what each role may do. Changes apply immediately, including to people already signed in." flush>
+    <Card
+      title="Role permissions"
+      subtitle="Tick what each role may do. Admins can always do everything. Changes apply immediately, including to people already signed in."
+      flush
+    >
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-xs text-slate-500">
             <tr>
               <th className="px-4 py-2 text-left font-medium">Permission</th>
-              <th className="px-4 py-2 font-medium">Admin</th>
+              <th className="hidden px-4 py-2 font-medium sm:table-cell">Admin</th>
               {CONFIGURABLE.map((r) => (
-                <th key={r} className="px-4 py-2 font-medium">
+                <th key={r} className="px-2 py-2 font-medium sm:px-4">
                   {LABEL.role[r]}
                 </th>
               ))}
@@ -282,11 +312,11 @@ function PermissionsCard() {
             {PERMISSIONS.map((p) => (
               <tr key={p}>
                 <td className="px-4 py-2 text-slate-800">{PERMISSION_LABEL[p]}</td>
-                <td className="px-4 py-2">
+                <td className="hidden px-4 py-2 sm:table-cell">
                   <Check className="mx-auto size-4 text-emerald-600" aria-label="Always" />
                 </td>
                 {CONFIGURABLE.map((r) => (
-                  <td key={r} className="px-4 py-2 text-center">
+                  <td key={r} className="px-2 py-2 text-center sm:px-4">
                     <input
                       type="checkbox"
                       className="size-4 accent-slate-900"
@@ -306,7 +336,7 @@ function PermissionsCard() {
             ))}
             <tr>
               <td className="px-4 py-2 text-slate-800">Manage users, roles and alert settings</td>
-              <td className="px-4 py-2">
+              <td className="hidden px-4 py-2 sm:table-cell">
                 <Check className="mx-auto size-4 text-emerald-600" aria-label="Always" />
               </td>
               <td colSpan={CONFIGURABLE.length} className="px-4 py-2 text-center text-xs text-slate-400">

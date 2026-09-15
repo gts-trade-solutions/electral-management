@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { CustodyTimeline } from "@/components/CustodyTimeline";
 import type { MiniMapLine, MiniMapPoint } from "@/components/MiniMap";
-import { ASSET_STATE_TONE, Badge, chipClass, CUSTODY_COLOR, cx, Empty, inputClass } from "@/components/ui";
+import { ASSET_STATE_TONE, Badge, chipClass, chipRowClass, CUSTODY_COLOR, cx, Empty, inputClass } from "@/components/ui";
 import { LABEL, sastDateTime, timeAgo } from "@/lib/format";
 import { useData } from "@/lib/hooks";
 import { toLngLat } from "@/lib/rules";
@@ -71,19 +71,23 @@ function AssetsScreen() {
         </div>
       </header>
 
-      <div className="flex flex-wrap gap-2">
-        {(["ALL", AssetType.VMD, AssetType.BALLOT_BOX, AssetType.BALLOT_PAPERS] as const).map((t) => (
-          <button key={t} type="button" className={chipClass(type === t)} onClick={() => setType(t)}>
-            {t === "ALL" ? "Every type" : LABEL.assetType[t]}
-          </button>
-        ))}
-        <span className="mx-1 w-px bg-slate-300" />
-        {(["ALL", ...Object.values(AssetState)] as const).map((st) => (
-          <button key={st} type="button" className={chipClass(state === st)} onClick={() => setState(st)}>
-            {st === "ALL" ? "Every state" : LABEL.assetState[st]}{" "}
-            <span className="opacity-60">{st === "ALL" ? s.assets.length : s.assets.filter((a) => a.state === st).length}</span>
-          </button>
-        ))}
+      <div className="space-y-2 sm:flex sm:flex-wrap sm:gap-2 sm:space-y-0">
+        <div className={chipRowClass}>
+          {(["ALL", AssetType.VMD, AssetType.BALLOT_BOX, AssetType.BALLOT_PAPERS] as const).map((t) => (
+            <button key={t} type="button" className={chipClass(type === t)} onClick={() => setType(t)}>
+              {t === "ALL" ? "Every type" : LABEL.assetType[t]}
+            </button>
+          ))}
+        </div>
+        <span className="hidden w-px bg-slate-300 sm:block" />
+        <div className={chipRowClass}>
+          {(["ALL", ...Object.values(AssetState)] as const).map((st) => (
+            <button key={st} type="button" className={chipClass(state === st)} onClick={() => setState(st)}>
+              {st === "ALL" ? "Every state" : LABEL.assetState[st]}{" "}
+              <span className="opacity-60">{st === "ALL" ? s.assets.length : s.assets.filter((a) => a.state === st).length}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
@@ -107,7 +111,8 @@ function AssetsScreen() {
                 const last = lastEvent.get(a.id);
                 return (
                   <tr key={a.id} onClick={() => open(a)} className="cursor-pointer hover:bg-slate-50">
-                    <td className="px-4 py-2.5">
+                    {/* On phones this cell takes the spare width and truncates the location, so the state badge stays in view. */}
+                    <td className="px-4 py-2.5 max-md:w-full max-md:max-w-0">
                       <button type="button" onClick={() => open(a)} className="font-mono font-medium text-slate-900 hover:underline">
                         {a.serial}
                       </button>
@@ -182,7 +187,13 @@ function AssetDrawer({ asset, onClose }: { asset: Asset; onClose: () => void }) 
       if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // Keep the list behind the drawer from scrolling under your finger.
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
+    };
   }, [onClose]);
 
   // Numbered dots where each hand-off was scanned, a big "Now" dot, and the trip it's on.

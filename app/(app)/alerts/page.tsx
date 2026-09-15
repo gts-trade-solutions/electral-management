@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AlertList } from "@/components/AlertList";
-import { chipClass } from "@/components/ui";
+import { chipClass, chipRowClass } from "@/components/ui";
 import { LABEL } from "@/lib/format";
 import { useData } from "@/lib/hooks";
 import { AlertType } from "@/lib/types";
@@ -29,14 +29,14 @@ export default function AlertsPage() {
           crew leaving a vehicle or walking away from it, or a loaded asset&apos;s RFID tag going quiet.
         </p>
       </header>
-      <div className="flex flex-wrap gap-2">
+      <div className={chipRowClass}>
         {(["OPEN", "ACKNOWLEDGED", "ALL"] as const).map((v) => (
           <button key={v} type="button" className={chipClass(show === v)} onClick={() => setShow(v)}>
             {v === "OPEN" ? `Open (${open})` : v === "ACKNOWLEDGED" ? "Acknowledged" : "All"}
           </button>
         ))}
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div className={chipRowClass}>
         {(["ALL", ...Object.values(AlertType)] as const).map((v) => (
           <button key={v} type="button" className={chipClass(type === v)} onClick={() => setType(v)}>
             {v === "ALL" ? "Every type" : LABEL.alertType[v]}

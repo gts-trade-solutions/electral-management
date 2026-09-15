@@ -39,6 +39,8 @@ export function MiniMap({
       center: [28.05, -26.2],
       zoom: 9,
       attributionControl: { compact: true },
+      // On touch screens one finger scrolls the page and two move the map.
+      cooperativeGestures: window.matchMedia("(pointer: coarse)").matches,
     });
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
     map.on("load", () => {
